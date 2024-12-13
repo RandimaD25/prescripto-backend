@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 
+
+//comment for doctors schema
 const doctorSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
