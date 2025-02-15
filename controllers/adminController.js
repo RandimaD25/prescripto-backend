@@ -51,7 +51,7 @@ const addDoctor = async (req, res) => {
     if (password.length < 8) {
       return res.json({
         success: false,
-        message: "Please enter a string password",
+        message: "Please enter a strong password",
       });
     }
 
@@ -122,4 +122,18 @@ const loginAdmin = async (req, res) => {
     });
   }
 };
-export { addDoctor, loginAdmin };
+
+//API to get all doctors lost for admin panel
+const allDoctors = async (req, res) => {
+  try {
+    const doctors = await doctorModel.find({}).select("-password");
+    res.json({ success: true, doctors });
+  } catch (error) {
+    res.json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export { addDoctor, loginAdmin, allDoctors };
