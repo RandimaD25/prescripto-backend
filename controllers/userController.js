@@ -188,7 +188,7 @@ const cancelAppointments = async (req, res) => {
 
     //verify appointment user
     if (appointmentData.userId !== userId) {
-      return res.json({ success: false, message: "Unauthorized Action." });
+      return res.json({ success: false, message: "Unauthorized action" });
     }
 
     await appointmentModel.findByIdAndUpdate(appointmentId, {
@@ -197,14 +197,16 @@ const cancelAppointments = async (req, res) => {
 
     //releasing doctor slot
     const { docId, slotDate, slotTime } = appointmentData;
+
     const doctorData = await doctorModel.findById(docId);
 
     let slots_booked = doctorData.slots_booked;
-    slots_booked[slotTime] = slots_booked[slotDate].filter(
+
+    slots_booked[slotDate] = slots_booked[slotDate].filter(
       (e) => e !== slotTime
     );
-    await doctorModel.findByIdAndUpdate(docId, { slots_booked });
 
+    await doctorModel.findByIdAndUpdate(docId, { slots_booked });
     res.json({ success: true, message: "Appointment Cancelled." });
   } catch (error) {
     console.log(error);
