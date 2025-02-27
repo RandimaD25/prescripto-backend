@@ -5,6 +5,7 @@ import userModel from "../models/userModel.js";
 import { v2 as cloudinary } from "cloudinary";
 import doctorModel from "../models/doctorModel.js";
 import appointmentModel from "../models/appointmentModel.js";
+import Stripe from "stripe";
 
 //API to register user
 const registerUser = async (req, res) => {
@@ -214,6 +215,60 @@ const cancelAppointments = async (req, res) => {
   }
 };
 
+//API to make payment of appointment using Stripe
+const paymentStripe = async (req, res) => {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+  try {
+    const { appointmentId } = req.body;
+    const appointmentData = await appointmentModel.findById(appointmentId);
+
+    if (!appointmentData || appointmentData.cancelled) {
+      return res.json({
+        success: false,
+        message: "Appointment Cancelled or not found",
+      });
+    }
+
+    //creating options for stripe payment
+    // const options = {
+    //   amount: appointmentData.amount * 100,
+    //   currency: process.env.CURRENCY,
+    //   receipt: appointmentId,
+    // };
+
+    //create stripe checkout session
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      mode: "payment",
+      success_url: `${process.env.CLIENT_SITE_URL}/payment-success`,
+      cancel_url: `${process.env.CLIENT_SITE_URL}/payment-failed`,
+      client_reference_id: appointmentId,
+      line_items: [
+        {
+          price_data: {
+            currency: process.env.CURRENCY,
+            unit_amount: appointmentData.amount * 100,
+            product_data: {
+              name: appointmentData.docData.name,
+              // image: appointmentData.docData.image,
+            },
+          },
+          quantity: 1,
+        },
+      ],
+    });
+
+    return res.json({
+      success: true,
+      message: "Payment Successful",
+      session,
+    });
+  } catch (error) {
+    console.log("ERROR", error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
 export {
   registerUser,
   loginUser,
@@ -222,4 +277,5 @@ export {
   bookAppointment,
   listAppointments,
   cancelAppointments,
+  paymentStripe,
 };
