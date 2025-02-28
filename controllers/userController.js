@@ -229,13 +229,6 @@ const paymentStripe = async (req, res) => {
       });
     }
 
-    //creating options for stripe payment
-    // const options = {
-    //   amount: appointmentData.amount * 100,
-    //   currency: process.env.CURRENCY,
-    //   receipt: appointmentId,
-    // };
-
     //create stripe checkout session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -250,12 +243,17 @@ const paymentStripe = async (req, res) => {
             unit_amount: appointmentData.amount * 100,
             product_data: {
               name: appointmentData.docData.name,
-              // image: appointmentData.docData.image,
+              description: `${appointmentData.slotTime}`,
+              images: [appointmentData.docData.image],
             },
           },
           quantity: 1,
         },
       ],
+    });
+
+    await appointmentModel.findByIdAndUpdate(appointmentId, {
+      payment: true,
     });
 
     return res.json({
