@@ -227,42 +227,42 @@ const paymentStripe = async (req, res) => {
         success: false,
         message: "Appointment Cancelled or not found",
       });
+    } else {
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        mode: "payment",
+        success_url: `${process.env.CLIENT_SITE_URL}/payment-success`,
+        cancel_url: `${process.env.CLIENT_SITE_URL}/payment-failed`,
+        client_reference_id: appointmentId,
+        line_items: [
+          {
+            price_data: {
+              currency: process.env.CURRENCY,
+              unit_amount: appointmentData.amount * 100,
+              product_data: {
+                name: appointmentData.docData.name,
+                description: appointmentData.slotTime,
+                images: [appointmentData.docData.image],
+              },
+            },
+            quantity: 1,
+          },
+        ],
+      });
+
+      await appointmentModel.findByIdAndUpdate(appointmentId, {
+        payment: true,
+      });
+
+      return res.json({
+        success: true,
+        message: "Payment Successful",
+        session,
+      });
     }
 
     //create stripe checkout session
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      mode: "payment",
-      success_url: `${process.env.CLIENT_SITE_URL}/payment-success`,
-      cancel_url: `${process.env.CLIENT_SITE_URL}/payment-failed`,
-      client_reference_id: appointmentId,
-      line_items: [
-        {
-          price_data: {
-            currency: process.env.CURRENCY,
-            unit_amount: appointmentData.amount * 100,
-            product_data: {
-              name: appointmentData.docData.name,
-              description: `${appointmentData.slotTime}`,
-              images: [appointmentData.docData.image],
-            },
-          },
-          quantity: 1,
-        },
-      ],
-    });
-
-    await appointmentModel.findByIdAndUpdate(appointmentId, {
-      payment: true,
-    });
-
-    return res.json({
-      success: true,
-      message: "Payment Successful",
-      session,
-    });
   } catch (error) {
-    console.log("ERROR", error);
     res.json({ success: false, message: error.message });
   }
 };
