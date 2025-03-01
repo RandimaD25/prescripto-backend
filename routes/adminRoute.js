@@ -2,6 +2,7 @@ import express from "express";
 import {
   addDoctor,
   allDoctors,
+  appointmentCancel,
   appointmentsAdmin,
   loginAdmin,
 } from "../controllers/adminController.js";
@@ -16,4 +17,5 @@ adminRouter.post("/login", loginAdmin);
 adminRouter.post("/all-doctors", authAdmin, allDoctors);
 adminRouter.post("/change-availability", authAdmin, changeAvailability);
 adminRouter.get("/appointments", authAdmin, appointmentsAdmin);
+adminRouter.post("/cancel-appointment", authAdmin, appointmentCancel);
 export default adminRouter;
