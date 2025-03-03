@@ -110,10 +110,11 @@ const doctorDashboard = async (req, res) => {
     const { docId } = req.body;
     const appointments = await appointmentModel.find({ docId });
 
-    appointments.reduce((item, acc) => {
+    let earnings = 0;
+
+    appointments.map((item) => {
       if (item.isCompleted || item.payment) {
-        let earnings = acc + item.amount;
-        return earnings;
+        earnings += item.amount;
       }
     });
 
