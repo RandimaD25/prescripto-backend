@@ -65,7 +65,7 @@ const appointmentsDoctor = async (req, res) => {
 };
 
 //API to mark appointment completed for doctor panel
-const appointmentComplete = async () => {
+const appointmentComplete = async (req, res) => {
   try {
     const { docId, appointmentId } = req.body;
     const appointmentData = await appointmentModel.findById(appointmentId);
@@ -85,7 +85,7 @@ const appointmentComplete = async () => {
 };
 
 //API to cancel appointment for doctor panel
-const appointmentCancel = async () => {
+const appointmentCancel = async (req, res) => {
   try {
     const { docId, appointmentId } = req.body;
     const appointmentData = await appointmentModel.findById(appointmentId);
